@@ -1,0 +1,40 @@
+version: '3.7'
+services:
+  db:
+    image: postgres:11.1
+    environment:
+      DB_USER: ${DB_USER:-time_tracker}
+      DB_NAME: ${DB_NAME:-time_tracker}
+      DB_PASSWORD: ${DB_PASSWORD:-x43PYO3zCV4OPJeu2dZ6kZM09VnZG7Yy}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dUm4Hco41z9GjYJ7nW6dfXD2mD342nBm}
+    volumes:
+      - ./db-init.sh:/docker-entrypoint-initdb.d/db-init.sh:ro
+      - ./schema.sql:/schema.sql:ro
+  app:
+    build:
+      context: .
+      dockerfile: app.dockerfile
+      args:
+        USER_ID: ${USER_ID:-1000}
+        GROUP_ID: ${GROUP_ID:-1000}
+    command:
+      - /bin/sleep
+      - infinity
+    tty: true
+    init: true
+    environment:
+      DEBUG: ${DEBUG:-}
+      PORT: ${PORT:-8080}
+      DB_NAME: ${DB_NAME:-time_tracker}
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-time_tracker}
+      DB_PASSWORD: ${DB_PASSWORD:-x43PYO3zCV4OPJeu2dZ6kZM09VnZG7Yy}
+      DB_POOL_MIN_SIZE: ${DB_POOL_MIN_SIZE:-1}
+      DB_POOL_MAX_SIZE: ${DB_POOL_MAX_SIZE:-5}
+    ports:
+      - "127.0.0.1:${PORT:-8080}:${PORT:-8080}"
+    volumes:
+      - ./:/home/developer/time-tracker
+    depends_on:
+      - db
