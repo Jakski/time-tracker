@@ -23,6 +23,7 @@ services:
     tty: true
     init: true
     environment:
+      TZ: ${TZ:-Europe/Warsaw}
       DEBUG: ${DEBUG:-}
       PORT: ${PORT:-8080}
       DB_NAME: ${DB_NAME:-time_tracker}
