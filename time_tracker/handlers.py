@@ -1,4 +1,9 @@
-from tornado.web import RequestHandler
+import json
+from datetime import datetime
+
+from tornado.web import (
+        RequestHandler,
+        MissingArgumentError)
 from tornado.ioloop import IOLoop
 
 from time_tracker import (
@@ -31,3 +36,20 @@ class TaskHandler(DatabaseMixin):
         await self.db.create_tasks(report(
             self.request.files.popitem()[1][0]['body'].decode('utf-8')
         ).parse())
+
+
+class ReportHandler(DatabaseMixin):
+
+    async def get(self):
+        try:
+            start = datetime.strptime(
+                self.get_query_argument('start'), '%Y-%m-%d %H:%M')
+            end = datetime.strptime(
+                self.get_query_argument('end'), '%Y-%m-%d %H:%M')
+        except MissingArgumentError:
+            self.set_status(400, 'Missing start or end query parameter')
+            return
+        ret = {}
+        for stat in await self.db.get_tag_report(start, end):
+            ret[stat[0]] = str(stat[1])
+        self.write(json.dumps(ret))

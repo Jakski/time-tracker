@@ -5,19 +5,28 @@ import asyncpg
 
 class Connection:
 
-    INSERT_TASK_QUERY = (
-        'INSERT INTO task (name, "start", "end") VALUES ($1, $2, $3)'
-    )
-    INSERT_TASK_TAG_NEW_QUERY = (
-        'INSERT INTO task_tag (tag_id, task_id) '
-        'VALUES (currval(\'tag_id_seq\'), currval(\'task_id_seq\'))'
-    )
-    INSERT_TASK_TAG_QUERY = (
-        'INSERT INTO task_tag (tag_id, task_id) '
-        'VALUES ($1, currval(\'task_id_seq\'))'
-    )
+    INSERT_TASK_QUERY = '''
+INSERT INTO task (name, "start", "end") VALUES ($1, $2, $3)
+'''
+    INSERT_TASK_TAG_NEW_QUERY = '''
+INSERT INTO task_tag (tag_id, task_id)
+VALUES (currval(\'tag_id_seq\'), currval(\'task_id_seq\'))
+'''
+    INSERT_TASK_TAG_QUERY = '''
+INSERT INTO task_tag (tag_id, task_id)
+VALUES ($1, currval(\'task_id_seq\'))
+'''
     INSERT_TAG_QUERY = 'INSERT INTO tag (name) VALUES ($1)'
     SELECT_TAG_QUERY = 'SELECT id FROM tag WHERE name = $1'
+    SELECT_TAG_REPORT_QUERY = '''
+SELECT tag.name, sum(task.end - task.start) AS time
+FROM task, tag, task_tag
+WHERE task.id = task_tag.task_id
+    AND task_tag.tag_id = tag.id
+    AND task.start >= $1
+    AND task.start < $2
+GROUP BY tag.id;
+'''
 
     def __init__(self, pool):
         self._pool = pool
@@ -49,6 +58,12 @@ class Connection:
                     self.INSERT_TASK_QUERY,
                     task[0], task[2], task[3])
                 await self.create_task_tags(task[1])
+
+    async def get_tag_report(self, start, end):
+        return list(map(
+            lambda tag: (tag['name'], tag['time']),
+            await self._connection.fetch(
+                self.SELECT_TAG_REPORT_QUERY, start, end)))
 
     @staticmethod
     async def create_pool():
