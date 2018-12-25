@@ -49,6 +49,9 @@ class ReportHandler(DatabaseMixin):
         except MissingArgumentError:
             self.set_status(400, 'Missing start or end query parameter')
             return
+        except ValueError:
+            self.set_status(400, 'Query parameters have wrong format')
+            return
         ret = {}
         for stat in await self.db.get_tag_report(start, end):
             ret[stat[0]] = str(stat[1])
