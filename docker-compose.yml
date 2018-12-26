@@ -26,6 +26,7 @@ services:
       TZ: ${TZ:-Europe/Warsaw}
       DEBUG: ${DEBUG:-}
       PORT: ${PORT:-8080}
+      HOST: ${HOST:-0.0.0.0}
       DB_NAME: ${DB_NAME:-time_tracker}
       DB_HOST: db
       DB_PORT: 5432

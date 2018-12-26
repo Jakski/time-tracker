@@ -21,5 +21,7 @@ def make_application(pool, debug):
 def main():
     pool = IOLoop.current().run_sync(lambda: database.Connection.create_pool())
     app = make_application(pool, bool(os.environ.get('DEBUG', '')))
-    app.listen(int(os.environ.get('PORT', '8080')))
+    app.listen(
+        int(os.environ.get('PORT', '8080')),
+        os.environ.get('HOST', '127.0.0.1'))
     IOLoop.current().start()
