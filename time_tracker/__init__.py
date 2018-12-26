@@ -8,13 +8,18 @@ from time_tracker import (
     handlers)
 
 
+def make_application(pool, debug):
+    db_cfg = {'pool': pool}
+    return Application(
+        [
+            (r'/task\.(.*)', handlers.TaskHandler, db_cfg),
+            (r'/report', handlers.ReportHandler, db_cfg),
+        ],
+        debug=debug)
+
+
 def main():
     pool = IOLoop.current().run_sync(lambda: database.Connection.create_pool())
-    app = Application(
-        [
-            (r'/task\.(.*)', handlers.TaskHandler, {'pool': pool}),
-            (r'/report', handlers.ReportHandler, {'pool': pool}),
-        ],
-        debug=bool(os.environ.get('DEBUG', '')))
+    app = make_application(pool, bool(os.environ.get('DEBUG', '')))
     app.listen(int(os.environ.get('PORT', '8080')))
     IOLoop.current().start()

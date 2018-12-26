@@ -9,6 +9,11 @@ setup(
         'tornado',
         'asyncpg'
     ],
+    extras_require={
+        'test': [
+            'flake8'
+        ]
+    },
     entry_points={
         'console_scripts': [
             'time-tracker=time_tracker:main'

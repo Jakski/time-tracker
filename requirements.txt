@@ -1,4 +1,2 @@
 asyncpg==0.18.2
-## !! Could not determine repository location
-time-tracker==0.0.0
 tornado==5.1.1
