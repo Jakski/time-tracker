@@ -17,4 +17,3 @@ Time tracker reads configuration from environment variables:
 - `DB_POOL_MAX_SIZE` - upper limit on active database connections
 - `PORT` - port to listen on
 - `HOST` - address to bind to
-- `TZ` - timezone
